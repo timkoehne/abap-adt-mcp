@@ -1,0 +1,38 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "abap-adt-mcp"
+version = "0.1.0"
+description = "MCP server exposing SAP ABAP Development Tools (ADT) via abap-adt-py."
+readme = "README.md"
+license = "MIT"
+authors = [
+  { name = "Tim Köhne", email = "20153452+timkoehne@users.noreply.github.com" }
+]
+requires-python = ">=3.10"
+dependencies = [
+  "abap-adt-py>=0.1.4",
+  "mcp>=2.2",
+]
+
+[project.scripts]
+abap-adt-mcp = "abap_adt_mcp.server:main"
+
+[project.urls]
+"Homepage" = "https://github.com/timkoehne/abap-adt-mcp"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[dependency-groups]
+dev = ["pytest>=7", "pytest-asyncio>=0.23"]
+
+# develop against the local library checkout; published builds use PyPI
+[tool.uv.sources]
+abap-adt-py = { path = "../abap-adt-py", editable = true }
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
