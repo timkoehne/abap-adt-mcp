@@ -23,6 +23,8 @@ Objects are addressed by ADT URIs, e.g.
   /sap/bc/adt/oo/classes/zcl_demo             class
   /sap/bc/adt/oo/interfaces/zif_demo          interface
   /sap/bc/adt/ddic/ddl/sources/z_cds_view     CDS view
+  /sap/bc/adt/ddic/tables/ztab_demo           database table
+  /sap/bc/adt/ddic/structures/zs_demo         structure
   /sap/bc/adt/packages/z_demo                 package
 search_objects returns the URI of every hit. Source code lives below the object at
 <object uri>/source/main (class includes: <class uri>/includes/testclasses, ...);
