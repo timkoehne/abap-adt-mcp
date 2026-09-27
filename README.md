@@ -48,9 +48,6 @@ returned to the agent as tool errors.
 
 ## Development
 
-`pyproject.toml` points `abap-adt-py` at a local checkout in `../abap-adt-py` (via `[tool.uv.sources]`), so
-library changes are picked up without a release. Built packages depend on the PyPI version.
-
 ```bash
 uv sync
 uv run pytest

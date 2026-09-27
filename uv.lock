@@ -25,7 +25,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "abap-adt-py", editable = "../abap-adt-py" },
+    { name = "abap-adt-py", specifier = ">=0.2.0" },
     { name = "mcp", specifier = ">=2.2" },
 ]
 
@@ -37,20 +37,16 @@ dev = [
 
 [[package]]
 name = "abap-adt-py"
-version = "0.1.4"
-source = { editable = "../abap-adt-py" }
+version = "0.2.0"
+source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "requests" },
     { name = "typing-extensions" },
 ]
-
-[package.metadata]
-requires-dist = [
-    { name = "pytest", marker = "extra == 'test'", specifier = ">=7" },
-    { name = "requests", specifier = ">=2.25" },
-    { name = "typing-extensions", specifier = ">=4.7.1" },
+sdist = { url = "https://files.pythonhosted.org/packages/04/fa/22d62df4ae8d19686f2ba0cb27abe82ec3217f88be73b1519f68ce2a8177/abap_adt_py-0.2.0.tar.gz", hash = "sha256:ebe9f0fbfb64348b8e595d3438ad2d0995070b26205bb9df42c2cd26c7dafd28", size = 34037, upload-time = "2026-09-27T15:09:59.595Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/63/77/c92caba8ef4e969048beccd85fb938d65f420b33c36e58846af9037da98e/abap_adt_py-0.2.0-py3-none-any.whl", hash = "sha256:7d08ef37c568ed817147268f0b6190fa91f320c53e19132a0d0daa76c44dc919", size = 41522, upload-time = "2026-09-27T15:09:58.399Z" },
 ]
-provides-extras = ["test"]
 
 [[package]]
 name = "annotated-types"

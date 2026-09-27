@@ -13,7 +13,7 @@ authors = [
 ]
 requires-python = ">=3.10"
 dependencies = [
-  "abap-adt-py>=0.1.4",
+  "abap-adt-py>=0.2.0",
   "mcp>=2.2",
 ]
 
@@ -28,10 +28,6 @@ where = ["src"]
 
 [dependency-groups]
 dev = ["pytest>=7", "pytest-asyncio>=0.23"]
-
-# develop against the local library checkout; published builds use PyPI
-[tool.uv.sources]
-abap-adt-py = { path = "../abap-adt-py", editable = true }
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
