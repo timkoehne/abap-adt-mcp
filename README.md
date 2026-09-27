@@ -13,6 +13,8 @@ cp .env.example .env   # fill in the SAP connection and a token
 uv run --env-file .env abap-adt-mcp
 ```
 
+Without a checkout, run the PyPI release: `uvx --env-file .env abap-adt-mcp`.
+
 The server speaks Streamable HTTP at `http://<ADT_MCP_HOST>:<ADT_MCP_PORT>/mcp` (default `http://127.0.0.1:2236/mcp`).
 It logs in to SAP on the first tool call and keeps one session for all clients.
 
