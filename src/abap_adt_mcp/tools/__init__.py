@@ -1,3 +1,15 @@
 """Importing this package registers all tools on the MCPServer instance."""
 
-from . import create, navigation, quality, repository, runtime, source, transport  # noqa: F401
+from . import (  # noqa: F401
+    create,
+    ddic,
+    enhancements,
+    messages,
+    navigation,
+    quality,
+    repository,
+    runtime,
+    services,
+    source,
+    transport,
+)
