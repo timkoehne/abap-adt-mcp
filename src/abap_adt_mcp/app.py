@@ -19,13 +19,18 @@ INSTRUCTIONS = """\
 Tools for an SAP system via the ABAP Development Tools (ADT) REST API.
 
 Objects are addressed by ADT URIs, e.g.
-  /sap/bc/adt/programs/programs/z_report      report
-  /sap/bc/adt/oo/classes/zcl_demo             class
-  /sap/bc/adt/oo/interfaces/zif_demo          interface
-  /sap/bc/adt/ddic/ddl/sources/z_cds_view     CDS view
-  /sap/bc/adt/ddic/tables/ztab_demo           database table
-  /sap/bc/adt/ddic/structures/zs_demo         structure
-  /sap/bc/adt/packages/z_demo                 package
+  /sap/bc/adt/programs/programs/z_report        report
+  /sap/bc/adt/oo/classes/zcl_demo               class
+  /sap/bc/adt/oo/interfaces/zif_demo            interface
+  /sap/bc/adt/ddic/ddl/sources/z_cds_view       CDS view
+  /sap/bc/adt/ddic/tables/ztab_demo             database table
+  /sap/bc/adt/ddic/structures/zs_demo           structure
+  /sap/bc/adt/ddic/domains/z_demo               domain
+  /sap/bc/adt/ddic/dataelements/z_demo          data element
+  /sap/bc/adt/messageclass/z_demo               message class
+  /sap/bc/adt/enhancements/enhoxhb/z_demo       enhancement implementation
+  /sap/bc/adt/businessservices/bindings/z_demo  service binding
+  /sap/bc/adt/packages/z_demo                   package
 search_objects returns the URI of every hit. Source code lives below the object at
 <object uri>/source/main (class includes: <class uri>/includes/testclasses, ...);
 tools taking an object URI also accept a source URI and vice versa.
@@ -85,6 +90,9 @@ async def run(fn: Callable[[AdtClient], T]) -> T:
         return await anyio.to_thread.run_sync(locked)
     except AdtError as error:
         raise ToolError(error_text(error)) from error
+    except ValueError as error:
+        # abap-adt-py rejects invalid arguments, e.g. a data element with two types
+        raise ToolError(str(error)) from error
     except requests.RequestException as error:
         reset_client()
         raise ToolError(f"Connection to the SAP system failed: {error}") from error

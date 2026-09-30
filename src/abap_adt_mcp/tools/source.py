@@ -1,4 +1,4 @@
-from typing import Literal, Optional
+from typing import Any, Literal, Optional, Union
 
 from ..app import mcp, object_name, run, split_uri, with_lock
 from ._annotations import READ, WRITE
@@ -41,12 +41,23 @@ async def write_source(
 
 
 @mcp.tool(annotations=WRITE)
-async def activate(object_uri: str, name: Optional[str] = None) -> str:
-    """Activate an object. The name defaults to the last segment of the URI."""
-    object_uri = split_uri(object_uri)[0]
-    name = name or object_name(object_uri)
-    await run(lambda c: c.activate(name, object_uri))
-    return f"Activated {name}"
+async def activate(object_uris: Union[str, list[str]]) -> str:
+    """Activate one or more objects together.
+
+    Objects that depend on each other, e.g. a CDS root view with a composition and its
+    child, have to be activated together in one call.
+    """
+    if isinstance(object_uris, str):
+        object_uris = [object_uris]
+    objects = [(object_name(uri), uri) for uri in (split_uri(uri)[0] for uri in object_uris)]
+    await run(lambda c: c.activate_objects(objects))
+    return "Activated " + ", ".join(name for name, _ in objects)
+
+
+@mcp.tool(annotations=READ)
+async def list_inactive_objects() -> list[dict[str, Any]]:
+    """Objects of all users that are saved but not activated, with the user who changed them."""
+    return await run(lambda c: c.inactive_objects())
 
 
 @mcp.tool(annotations=READ)

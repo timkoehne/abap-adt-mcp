@@ -18,9 +18,9 @@ def client(monkeypatch):
     return fake
 
 
-async def call(name, **arguments):
+async def call(tool, /, **arguments):
     async with Client(mcp) as session:
-        return await session.call_tool(name, arguments)
+        return await session.call_tool(tool, arguments)
 
 
 def text(result) -> str:
@@ -81,7 +81,7 @@ async def test_write_source_unlocks_when_writing_fails(client):
 
 async def test_failed_unlock_drops_session(client):
     client.unlock.side_effect = RuntimeError("connection lost")
-    await call("delete_object", object_uri=REPORT)
+    await call("delete_object", object_uris=REPORT)
     assert app._client is None
 
 
@@ -112,3 +112,68 @@ async def test_connection_errors_reach_the_model(client):
     assert result.is_error
     assert "Connection to the SAP system failed" in text(result)
     assert app._client is None
+
+
+async def test_activate_several_objects_together(client):
+    root = "/sap/bc/adt/ddic/ddl/sources/zi_root"
+    child = "/sap/bc/adt/ddic/ddl/sources/zi_child/source/main"
+    result = await call("activate", object_uris=[root, child])
+    assert not result.is_error
+    client.activate_objects.assert_called_once_with(
+        [("ZI_ROOT", root), ("ZI_CHILD", "/sap/bc/adt/ddic/ddl/sources/zi_child")]
+    )
+
+
+async def test_delete_several_objects_together(client):
+    uris = ["/sap/bc/adt/ddic/ddl/sources/zi_root", "/sap/bc/adt/ddic/ddl/sources/zi_child"]
+    result = await call("delete_object", object_uris=uris, transport="K900001")
+    assert not result.is_error
+    client.delete_objects.assert_called_once_with(uris, "K900001")
+    client.lock.assert_not_called()
+
+
+async def test_domain_fixed_values_leave_out_unset_fields(client):
+    await call(
+        "create_domain",
+        name="zstatus",
+        package="$TMP",
+        description="Status",
+        data_type="CHAR",
+        length=1,
+        fixed_values=[{"low": "N", "text": "New"}, {"low": "1", "high": "9"}],
+    )
+    kwargs = client.create_domain.call_args.kwargs
+    assert kwargs["fixed_values"] == [{"low": "N", "text": "New"}, {"low": "1", "high": "9", "text": ""}]
+
+
+async def test_badi_filters_keep_their_nesting(client):
+    implementation = {
+        "name": "ZIMPL",
+        "badi": "ZBADI",
+        "implementing_class": "ZCL_IMPL",
+        "filters": [[{"filter": "PLANT", "value": "1000"}], [{"filter": "PLANT", "low": "2000", "high": "2999"}]],
+    }
+    result = await call(
+        "create_enhancement_implementation",
+        name="zenho",
+        package="$TMP",
+        description="Impl",
+        spot="ZSPOT",
+        implementations=[implementation],
+    )
+    assert not result.is_error
+    passed = client.create_enhancement_implementation.call_args.args[4]
+    assert passed == [implementation]
+
+
+async def test_invalid_arguments_reach_the_model(client):
+    client.create_data_element.side_effect = ValueError("pass exactly one of domain, data_type and reference_to")
+    result = await call("create_data_element", name="zde", package="$TMP", description="x")
+    assert result.is_error
+    assert "exactly one of domain" in text(result)
+
+
+async def test_publish_returns_service_urls(client):
+    client.publish_service_binding.return_value = ["/sap/opu/odata4/sap/zui_travel/srvd/sap/ztravel/0001/"]
+    result = await call("publish_service_binding", name="ZUI_TRAVEL")
+    assert "/sap/opu/odata4/sap/zui_travel/" in text(result)

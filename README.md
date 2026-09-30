@@ -3,8 +3,9 @@
 An [MCP](https://modelcontextprotocol.io) server that gives AI agents access to an SAP system through the
 ABAP Development Tools (ADT) REST API. It is a thin layer over the
 [abap-adt-py](https://github.com/timkoehne/abap-adt-py) library: search and browse the repository, read and write
-source code, activate, run syntax checks, unit tests and ATC, run SQL queries and classes, read short dumps and
-manage transport requests.
+source code, activate, run syntax checks, unit tests and ATC, run SQL queries and classes, read short dumps,
+maintain domains, data elements and message classes, implement BAdIs, publish OData service bindings and manage
+transport requests.
 
 ## Running
 
@@ -37,16 +38,21 @@ claude mcp add --transport http abap-adt http://localhost:2236/mcp --header "Aut
 | Area | Tools |
 |---|---|
 | Repository | `search_objects`, `package_contents`, `object_package_path`, `object_structure` |
-| Source | `get_source`, `write_source`, `activate`, `pretty_print` |
-| Create / delete | `create_object`, `create_package`, `create_domain`, `create_table_type`, `create_service_binding`, `create_test_class_include`, `delete_object` |
+| Source | `get_source`, `write_source`, `activate`, `list_inactive_objects`, `pretty_print` |
+| Create / delete | `create_object`, `create_package`, `create_table_type`, `create_test_class_include`, `delete_object` |
+| Dictionary | `create_domain`, `get_domain`, `update_domain`, `create_data_element`, `get_data_element`, `update_data_element` |
+| Message classes | `create_message_class`, `get_message_class`, `set_messages`, `delete_messages` |
+| BAdIs | `get_enhancement_spot`, `get_enhancement_implementation`, `create_enhancement_implementation`, `update_enhancement_implementation` |
+| Service bindings | `create_service_binding`, `get_service_binding`, `publish_service_binding`, `unpublish_service_binding` |
 | Quality | `syntax_check`, `run_unit_tests`, `run_atc`, `list_check_variants`, `atc_documentation` |
 | Navigation | `find_definition`, `where_used`, `code_completion` |
 | Runtime | `run_query`, `run_class`, `list_dumps`, `get_dump` |
 | Transports | `transport_info`, `create_transport`, `list_transports`, `release_transport`, `delete_transport` |
 
 Locking is handled inside the tools: `write_source` locks the object, writes, unlocks and activates, so agents
-never deal with lock handles. SAP errors (activation errors with their positions, locked objects, ...) are
-returned to the agent as tool errors.
+never deal with lock handles. `activate` and `delete_object` take a list of URIs for objects that depend on each
+other, such as a CDS root view and its composition child. SAP errors (activation errors with their positions,
+locked objects, ...) are returned to the agent as tool errors.
 
 ## Development
 
