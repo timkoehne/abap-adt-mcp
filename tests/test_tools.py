@@ -33,6 +33,14 @@ def test_split_uri():
     cls = "/sap/bc/adt/oo/classes/zcl_x"
     assert app.split_uri(f"{cls}/includes/testclasses")[0] == cls
     assert app.object_name(cls) == "ZCL_X"
+    include = "/sap/bc/adt/programs/includes/z_test_f01"
+    assert app.split_uri(include) == (include, f"{include}/source/main")
+    assert app.split_uri(f"{include}/source/main")[0] == include
+    assert app.object_name(include) == "Z_TEST_F01"
+    top = "/sap/bc/adt/functions/groups/z_grp/includes/lz_grptop"
+    assert app.split_uri(top) == (top, f"{top}/source/main")
+    assert app.split_uri(f"{top}/source/main")[0] == top
+    assert app.object_name(top) == "LZ_GRPTOP"
 
 
 async def test_all_tools_listed():

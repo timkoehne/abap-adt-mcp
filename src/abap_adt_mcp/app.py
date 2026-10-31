@@ -1,5 +1,6 @@
 """The MCPServer instance and the shared AdtClient every tool goes through."""
 
+import re
 import threading
 from typing import Callable, Optional, Tuple, TypeVar
 from urllib.parse import unquote
@@ -20,6 +21,7 @@ Tools for an SAP system via the ABAP Development Tools (ADT) REST API.
 
 Objects are addressed by ADT URIs, e.g.
   /sap/bc/adt/programs/programs/z_report        report
+  /sap/bc/adt/programs/includes/z_report_f01    include
   /sap/bc/adt/oo/classes/zcl_demo               class
   /sap/bc/adt/oo/interfaces/zif_demo            interface
   /sap/bc/adt/ddic/ddl/sources/z_cds_view       CDS view
@@ -101,9 +103,14 @@ async def run(fn: Callable[[AdtClient], T]) -> T:
 def split_uri(uri: str) -> Tuple[str, str]:
     """(object uri, source uri) from either of them."""
     uri = uri.rstrip("/")
-    for marker in ("/source/", "/includes/"):
-        if marker in uri:
-            return uri.split(marker, 1)[0], uri
+    if "/source/" in uri:
+        return uri.split("/source/", 1)[0], uri
+    # class includes (testclasses, ...) are sources of the class, report and
+    # function group includes (programs/includes/x, groups/g/includes/x) are
+    # objects of their own with a /source/main
+    class_include = re.match(r"(.*/oo/classes/[^/]+)/includes/", uri)
+    if class_include:
+        return class_include.group(1), uri
     return uri, f"{uri}/source/main"
 
 
