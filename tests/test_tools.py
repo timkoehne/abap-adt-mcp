@@ -185,3 +185,24 @@ async def test_publish_returns_service_urls(client):
     client.publish_service_binding.return_value = ["/sap/opu/odata4/sap/zui_travel/srvd/sap/ztravel/0001/"]
     result = await call("publish_service_binding", name="ZUI_TRAVEL")
     assert "/sap/opu/odata4/sap/zui_travel/" in text(result)
+
+
+async def test_authorization_object_defaults_to_cross_application_class(client):
+    result = await call(
+        "create_authorization_object",
+        name="zao_test",
+        package="$TMP",
+        description="Test",
+        fields=["ZAF_TEST", "ACTVT"],
+        activities=["01", "03"],
+    )
+    assert not result.is_error
+    client.create_authorization_object.assert_called_once_with(
+        "zao_test", "$TMP", "Test", "AAAB", ["ZAF_TEST", "ACTVT"], ["01", "03"], None
+    )
+    assert "ZAO_TEST" in text(result)
+
+
+async def test_authorization_field_update_passes_empty_check_table(client):
+    await call("update_authorization_field", name="ZAF_TEST", check_table="")
+    client.update_authorization_field.assert_called_once_with("ZAF_TEST", None, "", None)

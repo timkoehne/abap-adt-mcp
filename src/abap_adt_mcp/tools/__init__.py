@@ -1,6 +1,7 @@
 """Importing this package registers all tools on the MCPServer instance."""
 
 from . import (  # noqa: F401
+    authorization,
     create,
     ddic,
     enhancements,
