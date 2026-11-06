@@ -238,3 +238,29 @@ async def test_listed_schemas_are_compact_and_optional_values_still_accept_null(
     assert write["required"] == ["uri", "source"]
     result = await call("write_source", uri=REPORT, source="REPORT z_test.", transport=None)
     assert not result.is_error
+
+
+@pytest.mark.parametrize(
+    "tool, method, arguments, answer",
+    [
+        ("search_objects", "search_object", {"query": "ZNONE*"}, "No objects found."),
+        ("package_contents", "package_contents", {"package": "$TMP"}, "The package is empty."),
+        ("syntax_check", "syntax_check", {"uri": REPORT, "source": "REPORT z."}, "No errors or warnings."),
+        ("run_unit_tests", "run_unit_test", {"object_uri": REPORT}, "No failed tests."),
+        ("where_used", "where_used", {"uri": REPORT}, "Not used anywhere."),
+        ("list_dumps", "list_dumps", {}, "No dumps found."),
+    ],
+)
+async def test_an_empty_answer_says_so(client, tool, method, arguments, answer):
+    getattr(client, method).return_value = []
+    result = await call(tool, **arguments)
+    assert not result.is_error
+    assert text(result) == answer
+    assert result.structured_content == {"result": answer}
+
+
+async def test_a_list_answer_stays_a_list(client):
+    client.search_object.return_value = [{"name": "Z_TEST", "uri": REPORT}]
+    result = await call("search_objects", query="Z_TEST*")
+    assert '"Z_TEST"' in text(result)
+    assert result.structured_content == {"result": [{"name": "Z_TEST", "uri": REPORT}]}

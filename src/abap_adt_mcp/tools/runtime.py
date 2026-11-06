@@ -23,10 +23,10 @@ async def list_dumps(
     runtime_error: Optional[str] = None,
     since_hours: Optional[float] = None,
     max_results: int = 50,
-) -> list[dict[str, Any]]:
+) -> list[dict[str, Any]] | str:
     """Short dumps (ST22), newest first."""
     since = datetime.now() - timedelta(hours=since_hours) if since_hours else None
-    return await run(lambda c: c.list_dumps(user, runtime_error, since, max_results))
+    return await run(lambda c: c.list_dumps(user, runtime_error, since, max_results)) or "No dumps found."
 
 
 @mcp.tool(annotations=READ)

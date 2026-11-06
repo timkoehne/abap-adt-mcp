@@ -5,18 +5,18 @@ from ._annotations import READ
 
 
 @mcp.tool(annotations=READ)
-async def search_objects(query: str, max_results: int = 20) -> list[dict[str, Any]]:
+async def search_objects(query: str, max_results: int = 20) -> list[dict[str, Any]] | str:
     """Find objects by name, * is a wildcard (ZCL_*ORDER*).
 
     Returns type, name, description, package and uri of each hit. Other tools take this uri.
     """
-    return await run(lambda c: c.search_object(query, max_results))
+    return await run(lambda c: c.search_object(query, max_results)) or "No objects found."
 
 
 @mcp.tool(annotations=READ)
-async def package_contents(package: str, recursive: bool = False) -> list[dict[str, Any]]:
+async def package_contents(package: str, recursive: bool = False) -> list[dict[str, Any]] | str:
     """Objects in a package. recursive=True includes subpackages."""
-    return await run(lambda c: c.package_contents(package, recursive))
+    return await run(lambda c: c.package_contents(package, recursive)) or "The package is empty."
 
 
 @mcp.tool(annotations=READ)

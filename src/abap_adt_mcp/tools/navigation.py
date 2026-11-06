@@ -17,9 +17,9 @@ async def find_definition(uri: str, source: str, line: int, column: int) -> Opti
 @mcp.tool(annotations=READ)
 async def where_used(
     uri: str, line: Optional[int] = None, column: Optional[int] = None
-) -> list[dict[str, Any]]:
+) -> list[dict[str, Any]] | str:
     """Where an object is used, or the element at line and column of its source."""
-    return await run(lambda c: c.where_used(uri, line, column))
+    return await run(lambda c: c.where_used(uri, line, column)) or "Not used anywhere."
 
 
 @mcp.tool(annotations=READ)

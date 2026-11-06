@@ -12,13 +12,14 @@ _DURATIONS = ["short", "medium", "long"]
 @mcp.tool(annotations=READ)
 async def syntax_check(
     uri: str, source: str, version: Literal["active", "inactive"] = "active"
-) -> list[dict[str, Any]]:
+) -> list[dict[str, Any]] | str:
     """Check source without saving it. uri is where it belongs.
 
-    Returns errors (E) and warnings (W) with line and offset; empty if clean.
+    Returns errors (E) and warnings (W) with line and offset.
     """
     object_uri, source_uri = split_uri(uri)
-    return await run(lambda c: c.syntax_check(object_uri, source_uri, source, version))
+    messages = await run(lambda c: c.syntax_check(object_uri, source_uri, source, version))
+    return messages or "No errors or warnings."
 
 
 @mcp.tool(annotations=READ)
@@ -26,8 +27,8 @@ async def run_unit_tests(
     object_uri: str,
     max_risk_level: Literal["harmless", "dangerous", "critical"] = "harmless",
     max_duration: Literal["short", "medium", "long"] = "medium",
-) -> list[dict[str, Any]]:
-    """Run the ABAP Unit tests of an object or package. Returns failed tests and warnings; empty if all passed."""
+) -> list[dict[str, Any]] | str:
+    """Run the ABAP Unit tests of an object or package. Returns failed tests and warnings."""
     risk = _RISK_LEVELS.index(max_risk_level)
     duration = _DURATIONS.index(max_duration)
     flags = UnittestFlags(
@@ -39,7 +40,7 @@ async def run_unit_tests(
         long=duration >= 2,
     )
     object_uri = split_uri(object_uri)[0]
-    return await run(lambda c: c.run_unit_test(object_uri, flags))
+    return await run(lambda c: c.run_unit_test(object_uri, flags)) or "No failed tests."
 
 
 @mcp.tool(annotations=READ)
