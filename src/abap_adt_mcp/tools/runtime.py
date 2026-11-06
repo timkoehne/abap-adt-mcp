@@ -7,7 +7,7 @@ from ._annotations import READ, WRITE
 
 @mcp.tool(annotations=READ)
 async def run_query(query: str, max_rows: int = 100) -> dict[str, Any]:
-    """Run an ABAP SQL SELECT (data preview). Rows come back as dicts keyed by column name."""
+    """Run an ABAP SQL SELECT. Rows come back keyed by column name."""
     return await run(lambda c: c.run_query(query, max_rows))
 
 
@@ -24,12 +24,12 @@ async def list_dumps(
     since_hours: Optional[float] = None,
     max_results: int = 50,
 ) -> list[dict[str, Any]]:
-    """Runtime errors (short dumps, ST22), newest first, optionally filtered by user, error and age."""
+    """Short dumps (ST22), newest first."""
     since = datetime.now() - timedelta(hours=since_hours) if since_hours else None
     return await run(lambda c: c.list_dumps(user, runtime_error, since, max_results))
 
 
 @mcp.tool(annotations=READ)
 async def get_dump(dump_id: str) -> dict[str, Any]:
-    """A short dump with its chapters ("What happened?", "Error analysis", source position, ...)."""
+    """A short dump with its chapters."""
     return await run(lambda c: c.get_dump(dump_id))

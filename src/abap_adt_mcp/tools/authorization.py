@@ -12,10 +12,9 @@ async def create_authorization_field(
     check_table: str = "",
     transport: Optional[str] = None,
 ) -> str:
-    """Create an active authorization field (SU20) typed by an existing data element with a domain.
+    """Create an authorization field (SU20) typed by a data element with a domain.
 
-    It takes its description from the data element; check_table holds the allowed values.
-    Delete it with /sap/bc/adt/aps/iam/auth/<name>, after the objects that use it.
+    check_table holds the allowed values. Its uri is /sap/bc/adt/aps/iam/auth/<name>.
     """
     await run(
         lambda c: c.create_authorization_field(name, package, data_element, check_table, transport)
@@ -36,7 +35,7 @@ async def update_authorization_field(
     check_table: Optional[str] = None,
     transport: Optional[str] = None,
 ) -> str:
-    """Change an authorization field. Arguments left out keep their value, check_table="" removes it."""
+    """Change an authorization field. Arguments left out stay; check_table="" removes it."""
     await run(lambda c: c.update_authorization_field(name, data_element, check_table, transport))
     return f"Updated authorization field {name.upper()}"
 
@@ -51,10 +50,10 @@ async def create_authorization_object(
     object_class: str = "AAAB",
     transport: Optional[str] = None,
 ) -> str:
-    """Create an active authorization object (SU21) with up to 10 authorization fields, in order.
+    """Create an authorization object (SU21) with up to 10 authorization fields.
 
-    activities are the allowed ACTVT values (e.g. ["01", "02", "03"]) when ACTVT is a field.
-    object_class AAAB is cross-application. Delete it with /sap/bc/adt/aps/iam/suso/<name>.
+    activities are the allowed ACTVT values when ACTVT is a field. object_class AAAB is
+    cross-application. Its uri is /sap/bc/adt/aps/iam/suso/<name>.
     """
     await run(
         lambda c: c.create_authorization_object(
@@ -66,7 +65,7 @@ async def create_authorization_object(
 
 @mcp.tool(annotations=READ)
 async def get_authorization_object(name: str) -> dict[str, Any]:
-    """An authorization object's class, fields, allowed activities, description and package."""
+    """An authorization object's class, fields, activities, description and package."""
     return await run(lambda c: c.get_authorization_object(name))
 
 
@@ -79,7 +78,7 @@ async def update_authorization_object(
     object_class: Optional[str] = None,
     transport: Optional[str] = None,
 ) -> str:
-    """Change an authorization object. Arguments left out keep their value, fields and activities are replaced."""
+    """Change an authorization object. Arguments left out stay; fields and activities are replaced."""
     await run(
         lambda c: c.update_authorization_object(
             name, description, object_class, fields, activities, transport

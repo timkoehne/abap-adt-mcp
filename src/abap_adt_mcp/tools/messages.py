@@ -13,7 +13,7 @@ async def create_message_class(
     messages: Optional[list[Message]] = None,
     transport: Optional[str] = None,
 ) -> str:
-    """Create a message class, optionally with messages, e.g. [{"number": "001", "text": "Bin &1 is blocked"}]."""
+    """Create a message class, optionally with messages."""
     await run(
         lambda c: c.create_message_class(name, package, description, plain(messages), transport)
     )
@@ -22,7 +22,7 @@ async def create_message_class(
 
 @mcp.tool(annotations=READ)
 async def get_message_class(name: str) -> dict[str, Any]:
-    """A message class with its description, package and messages."""
+    """A message class's description, package and messages."""
     return await run(lambda c: c.get_message_class(name))
 
 
@@ -33,10 +33,7 @@ async def set_messages(
     delete_others: bool = False,
     transport: Optional[str] = None,
 ) -> str:
-    """Add or change messages of a message class.
-
-    Messages not in the list are kept, unless delete_others=True.
-    """
+    """Add or change messages of a message class. Others stay unless delete_others=True."""
     await run(
         lambda c: c.set_messages(message_class, plain(messages), transport, delete_others)
     )
@@ -47,6 +44,6 @@ async def set_messages(
 async def delete_messages(
     message_class: str, numbers: list[str], transport: Optional[str] = None
 ) -> str:
-    """Delete messages from a message class by their numbers."""
+    """Delete messages of a message class by number."""
     await run(lambda c: c.delete_messages(message_class, numbers, transport))
     return f"Deleted messages {', '.join(numbers)} from {message_class.upper()}"

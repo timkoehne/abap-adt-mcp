@@ -6,16 +6,16 @@ from ._annotations import READ
 
 @mcp.tool(annotations=READ)
 async def search_objects(query: str, max_results: int = 20) -> list[dict[str, Any]]:
-    """Search repository objects by name, '*' is a wildcard (e.g. 'ZCL_*ORDER*').
+    """Find objects by name, * is a wildcard (ZCL_*ORDER*).
 
-    Every hit has the object's type, name, description, package and ADT URI.
+    Returns type, name, description, package and uri of each hit. Other tools take this uri.
     """
     return await run(lambda c: c.search_object(query, max_results))
 
 
 @mcp.tool(annotations=READ)
 async def package_contents(package: str, recursive: bool = False) -> list[dict[str, Any]]:
-    """Objects in a package. Subpackages appear as DEVC/K entries; recursive=True descends into them."""
+    """Objects in a package. recursive=True includes subpackages."""
     return await run(lambda c: c.package_contents(package, recursive))
 
 
@@ -27,5 +27,5 @@ async def object_package_path(object_uri: str) -> list[dict[str, Any]]:
 
 @mcp.tool(annotations=READ)
 async def object_structure(object_uri: str) -> dict[str, Any]:
-    """Outline of a class or interface: attributes, methods, types, ... with their visibility and links."""
+    """Outline of a class or interface: attributes, methods and types with their visibility."""
     return await run(lambda c: c.object_structure(split_uri(object_uri)[0]))

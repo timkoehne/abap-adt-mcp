@@ -13,9 +13,9 @@ _DURATIONS = ["short", "medium", "long"]
 async def syntax_check(
     uri: str, source: str, version: Literal["active", "inactive"] = "active"
 ) -> list[dict[str, Any]]:
-    """Check source code for syntax errors without saving it. uri is the object or include the source belongs to.
+    """Check source without saving it. uri is where it belongs.
 
-    Returns the messages with type (E error, W warning), text, line and offset; empty if clean.
+    Returns errors (E) and warnings (W) with line and offset; empty if clean.
     """
     object_uri, source_uri = split_uri(uri)
     return await run(lambda c: c.syntax_check(object_uri, source_uri, source, version))
@@ -27,10 +27,7 @@ async def run_unit_tests(
     max_risk_level: Literal["harmless", "dangerous", "critical"] = "harmless",
     max_duration: Literal["short", "medium", "long"] = "medium",
 ) -> list[dict[str, Any]]:
-    """Run the ABAP unit tests of an object (class, program, package, ...).
-
-    Returns the failed tests and warnings with their stack; an empty list means all tests passed.
-    """
+    """Run the ABAP Unit tests of an object or package. Returns failed tests and warnings; empty if all passed."""
     risk = _RISK_LEVELS.index(max_risk_level)
     duration = _DURATIONS.index(max_duration)
     flags = UnittestFlags(
@@ -51,10 +48,9 @@ async def run_atc(
     check_variant: Optional[str] = None,
     max_findings: int = 100,
 ) -> dict[str, Any]:
-    """Run the ABAP Test Cockpit on objects or packages (the system's default variant unless given).
+    """Run the ABAP Test Cockpit on objects or packages.
 
-    Finding priority: 1 error, 2 warning, 3 information. Pass a finding's
-    documentation_uri to atc_documentation for the explanation.
+    Finding priority: 1 error, 2 warning, 3 information. atc_documentation explains a finding.
     """
     return await run(lambda c: c.run_atc(object_uris, check_variant, max_findings))
 
@@ -67,5 +63,5 @@ async def list_check_variants(pattern: str = "*", max_results: int = 100) -> lis
 
 @mcp.tool(annotations=READ)
 async def atc_documentation(documentation_uri: str) -> str:
-    """Explanation of an ATC finding as plain text."""
+    """Explanation of an ATC finding."""
     return await run(lambda c: c.atc_documentation(documentation_uri))

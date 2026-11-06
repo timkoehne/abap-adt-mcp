@@ -6,9 +6,11 @@ from ._annotations import READ, WRITE
 
 @mcp.tool(annotations=READ)
 async def get_source(uri: str, version: Literal["active", "inactive"] = "active") -> str:
-    """Source code of an object (object URI) or of one of its includes (source URI).
+    """Source of an object, by the uri from search_objects.
 
-    version="inactive" returns saved but not yet activated changes.
+    Parts of a class: <class uri>/includes/definitions, /implementations, /testclasses.
+    TOP include of a function group: <group uri>/includes/l<group>top.
+    version="inactive" returns saved changes that are not activated.
     """
     source_uri = split_uri(uri)[1]
     return await run(lambda c: c.get_object_source(source_uri, version))
@@ -18,11 +20,10 @@ async def get_source(uri: str, version: Literal["active", "inactive"] = "active"
 async def write_source(
     uri: str, source: str, transport: Optional[str] = None, activate: bool = True
 ) -> str:
-    """Replace the complete source code of an object or include and activate it.
+    """Replace the whole source at a uri (as in get_source) and activate the object.
 
-    Locks the object, writes, unlocks again and activates unless activate=False.
-    Activation errors are returned with line positions; the source stays saved inactive.
-    Objects in transportable packages need a transport request number.
+    With activate=False it is only saved. Activation errors come with line numbers, and the
+    source stays saved inactive.
     """
     object_uri, source_uri = split_uri(uri)
 
@@ -42,11 +43,7 @@ async def write_source(
 
 @mcp.tool(annotations=WRITE)
 async def activate(object_uris: Union[str, list[str]]) -> str:
-    """Activate one or more objects together.
-
-    Objects that depend on each other, e.g. a CDS root view with a composition and its
-    child, have to be activated together in one call.
-    """
+    """Activate objects. Objects that depend on each other have to be activated in one call."""
     if isinstance(object_uris, str):
         object_uris = [object_uris]
     objects = [(object_name(uri), uri) for uri in (split_uri(uri)[0] for uri in object_uris)]
@@ -56,11 +53,11 @@ async def activate(object_uris: Union[str, list[str]]) -> str:
 
 @mcp.tool(annotations=READ)
 async def list_inactive_objects() -> list[dict[str, Any]]:
-    """Objects of all users that are saved but not activated, with the user who changed them."""
+    """Objects of all users that are saved but not active."""
     return await run(lambda c: c.inactive_objects())
 
 
 @mcp.tool(annotations=READ)
 async def pretty_print(source: str) -> str:
-    """Format ABAP source with the system's pretty printer settings."""
+    """Format ABAP source."""
     return await run(lambda c: c.prettyprint(source))

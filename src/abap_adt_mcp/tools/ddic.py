@@ -23,10 +23,9 @@ async def create_domain(
     fixed_values: Optional[list[FixedValue]] = None,
     transport: Optional[str] = None,
 ) -> str:
-    """Create and activate a domain with its data type (e.g. CHAR, NUMC, DEC), length and decimals.
+    """Create and activate a domain. data_type e.g. CHAR, NUMC, DEC.
 
-    output_length 0 lets SAP calculate it. fixed_values are single values
-    ({"low": "N", "text": "New"}) or intervals ({"low": "1", "high": "9", "text": ...}).
+    output_length 0 lets SAP calculate it.
     """
     await run(
         lambda c: c.create_domain(
@@ -52,7 +51,7 @@ async def create_domain(
 async def get_domain(
     name: str, version: Optional[Literal["active", "inactive"]] = None
 ) -> dict[str, Any]:
-    """A domain's data type, length, output characteristics, value table and fixed values."""
+    """A domain's type, length, output settings, value table and fixed values."""
     return await run(lambda c: c.get_domain(name, version))
 
 
@@ -71,10 +70,7 @@ async def update_domain(
     fixed_values: Optional[list[FixedValue]] = None,
     transport: Optional[str] = None,
 ) -> str:
-    """Change a domain and activate it. Arguments left out keep their value.
-
-    fixed_values replaces all fixed values, [] removes them.
-    """
+    """Change a domain and activate it. Arguments left out stay; fixed_values replaces all, [] removes them."""
     await run(
         lambda c: c.update_domain(
             name,
@@ -111,12 +107,8 @@ async def create_data_element(
     parameter_id: str = "",
     transport: Optional[str] = None,
 ) -> str:
-    """Create and activate a data element, typed by exactly one of domain, data_type or reference_to.
-
-    domain="ZSTATUS"; a built-in type data_type="CHAR", length=10; or TYPE REF TO a
-    class or interface (reference_to="ZCL_FOO"), a dictionary type
-    (reference_kind="dictionary") or a built-in type (reference_to="STRING",
-    reference_kind="built_in").
+    """Create and activate a data element, typed by exactly one of: domain; data_type with length;
+    reference_to (TYPE REF TO a class or interface, with reference_kind a dictionary or built-in type).
     """
     await run(
         lambda c: c.create_data_element(
@@ -143,7 +135,7 @@ async def create_data_element(
 async def get_data_element(
     name: str, version: Optional[Literal["active", "inactive"]] = None
 ) -> dict[str, Any]:
-    """A data element's type (type_kind, type_name, data_type), field labels, search help and parameter ID."""
+    """A data element's type, field labels, search help and parameter ID."""
     return await run(lambda c: c.get_data_element(name, version))
 
 
@@ -163,11 +155,7 @@ async def update_data_element(
     parameter_id: Optional[str] = None,
     transport: Optional[str] = None,
 ) -> str:
-    """Change a data element and activate it. Arguments left out keep their value.
-
-    Passing domain, data_type or reference_to changes the type; labels only changes
-    the labels it contains.
-    """
+    """Change a data element and activate it. Arguments left out stay; labels changes only the labels given."""
     await run(
         lambda c: c.update_data_element(
             name,

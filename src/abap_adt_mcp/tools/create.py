@@ -14,14 +14,13 @@ async def create_object(
     description: str,
     transport: Optional[str] = None,
 ) -> str:
-    """Create an empty repository object, then fill it with write_source.
+    """Create an empty object, then fill it with write_source.
 
-    Types: PROG/P report, PROG/I include, CLAS/OC class, INTF/OI interface,
-    FUGR/F function group, FUGR/FF function module (package = its function group),
-    TABL/DT table, TABL/DS structure, DDLS/DF CDS view, DDLX/EX metadata extension,
-    DCLS/DL access control, SRVD/SRV service definition, BDEF/BDO behavior definition (named after its root CDS entity).
-    Domains, data elements, message classes, table types, service bindings and
-    enhancement implementations have their own create tools.
+    object_type: PROG/P report, PROG/I include, CLAS/OC class, INTF/OI interface, FUGR/F function
+    group, FUGR/FF function module, TABL/DT table, TABL/DS structure, DDLS/DF CDS view, DDLX/EX
+    metadata extension, DCLS/DL access control, SRVD/SRV service definition, BDEF/BDO behavior
+    definition (named after its root CDS entity). Other types have their own create tools.
+    package: $TMP for local objects; for a function module, its function group.
     """
     await run(lambda c: c.create(object_type, name, package, description, transport))
     return f"Created {object_type} {name.upper()}"
@@ -37,7 +36,7 @@ async def create_package(
     transport_layer: str = "",
     transport: Optional[str] = None,
 ) -> str:
-    """Create a package. Local packages start with $ (e.g. parent "$TMP"); others need a transport."""
+    """Create a package. Local packages start with $."""
     await run(
         lambda c: c.create_package(
             name, description, parent, package_type, software_component, transport_layer, transport
@@ -57,7 +56,7 @@ async def create_table_type(
     decimals: int = 0,
     transport: Optional[str] = None,
 ) -> str:
-    """Create and activate a table type, either of a dictionary row type (e.g. SCARR) or of a built-in data_type/length."""
+    """Create and activate a table type of a dictionary row_type, or of a built-in data_type and length."""
     await run(
         lambda c: c.create_table_type(
             name, package, description, row_type, data_type, length, decimals, transport
@@ -68,7 +67,7 @@ async def create_table_type(
 
 @mcp.tool(annotations=WRITE)
 async def create_test_class_include(class_name: str, transport: Optional[str] = None) -> str:
-    """Add the local test class include to a class; write it via <class uri>/includes/testclasses."""
+    """Add the include for local test classes to a class. Write it at <class uri>/includes/testclasses."""
     class_uri = f"/sap/bc/adt/oo/classes/{class_name.lower()}"
     await run(
         lambda c: with_lock(
@@ -82,11 +81,7 @@ async def create_test_class_include(class_name: str, transport: Optional[str] = 
 
 @mcp.tool(annotations=DESTRUCTIVE)
 async def delete_object(object_uris: Union[str, list[str]], transport: Optional[str] = None) -> str:
-    """Delete one or more objects from the system.
-
-    Objects that use each other, e.g. a CDS root view and its composition child, have
-    to be deleted together in one call.
-    """
+    """Delete objects. Objects that use each other have to be deleted in one call."""
     if isinstance(object_uris, str) or len(object_uris) == 1:
         object_uri = split_uri(object_uris if isinstance(object_uris, str) else object_uris[0])[0]
         await run(
