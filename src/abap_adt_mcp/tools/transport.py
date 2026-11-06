@@ -5,15 +5,15 @@ from ._annotations import DESTRUCTIVE, READ, WRITE
 
 
 @mcp.tool(annotations=READ)
-async def transport_info(object_uri: str, package: str = "") -> dict[str, Any]:
+async def transport_info(uri: str, package: str = "") -> dict[str, Any]:
     """Whether changing an object needs a transport request, and which requests can be used."""
-    return await run(lambda c: c.transport_info(split_uri(object_uri)[0], package))
+    return await run(lambda c: c.transport_info(split_uri(uri)[0], package))
 
 
 @mcp.tool(annotations=WRITE)
-async def create_transport(object_uri: str, description: str, package: str) -> str:
+async def create_transport(uri: str, description: str, package: str) -> str:
     """Create a transport request for changes to an object in a package. Returns the request number."""
-    return await run(lambda c: c.create_transport(split_uri(object_uri)[0], description, package))
+    return await run(lambda c: c.create_transport(split_uri(uri)[0], description, package))
 
 
 @mcp.tool(annotations=READ)

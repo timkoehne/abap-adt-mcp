@@ -107,7 +107,7 @@ async def test_activation_errors_reach_the_model(client):
 
 async def test_unit_test_flags(client):
     client.run_unit_test.return_value = []
-    await call("run_unit_tests", object_uri=REPORT, max_risk_level="dangerous", max_duration="long")
+    await call("run_unit_tests", uri=REPORT, max_risk_level="dangerous", max_duration="long")
     flags = client.run_unit_test.call_args.args[1]
     assert (flags.harmless, flags.dangerous, flags.critical) == (True, True, False)
     assert (flags.short, flags.medium, flags.long) == (True, True, True)
@@ -246,7 +246,7 @@ async def test_listed_schemas_are_compact_and_optional_values_still_accept_null(
         ("search_objects", "search_object", {"query": "ZNONE*"}, "No objects found."),
         ("package_contents", "package_contents", {"package": "$TMP"}, "The package is empty."),
         ("syntax_check", "syntax_check", {"uri": REPORT, "source": "REPORT z."}, "No errors or warnings."),
-        ("run_unit_tests", "run_unit_test", {"object_uri": REPORT}, "No failed tests."),
+        ("run_unit_tests", "run_unit_test", {"uri": REPORT}, "No failed tests."),
         ("where_used", "where_used", {"uri": REPORT}, "Not used anywhere."),
         ("list_dumps", "list_dumps", {}, "No dumps found."),
     ],

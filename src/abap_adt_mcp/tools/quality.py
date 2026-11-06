@@ -24,7 +24,7 @@ async def syntax_check(
 
 @mcp.tool(annotations=READ)
 async def run_unit_tests(
-    object_uri: str,
+    uri: str,
     max_risk_level: Literal["harmless", "dangerous", "critical"] = "harmless",
     max_duration: Literal["short", "medium", "long"] = "medium",
 ) -> list[dict[str, Any]] | str:
@@ -39,7 +39,7 @@ async def run_unit_tests(
         medium=duration >= 1,
         long=duration >= 2,
     )
-    object_uri = split_uri(object_uri)[0]
+    object_uri = split_uri(uri)[0]
     return await run(lambda c: c.run_unit_test(object_uri, flags)) or "No failed tests."
 
 

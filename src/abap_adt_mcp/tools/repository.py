@@ -20,12 +20,12 @@ async def package_contents(package: str, recursive: bool = False) -> list[dict[s
 
 
 @mcp.tool(annotations=READ)
-async def object_package_path(object_uri: str) -> list[dict[str, Any]]:
+async def object_package_path(uri: str) -> list[dict[str, Any]]:
     """Package hierarchy of an object, top-level package first."""
-    return await run(lambda c: c.object_package_path(split_uri(object_uri)[0]))
+    return await run(lambda c: c.object_package_path(split_uri(uri)[0]))
 
 
 @mcp.tool(annotations=READ)
-async def object_structure(object_uri: str) -> dict[str, Any]:
+async def object_structure(uri: str) -> dict[str, Any]:
     """Outline of a class or interface: attributes, methods and types with their visibility."""
-    return await run(lambda c: c.object_structure(split_uri(object_uri)[0]))
+    return await run(lambda c: c.object_structure(split_uri(uri)[0]))
