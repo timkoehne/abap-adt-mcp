@@ -98,10 +98,17 @@ async def run(fn: Callable[[AdtClient], T]) -> T:
     except requests.RequestException as error:
         reset_client()
         raise ToolError(f"Connection to the SAP system failed: {error}") from error
+    except Exception as error:
+        raise ToolError(f"{type(error).__name__}: {error}") from error
 
 
 def split_uri(uri: str) -> Tuple[str, str]:
     """(object uri, source uri) from either of them."""
+    if not uri.startswith("/"):
+        raise ToolError(
+            f"{uri} is not a uri: it has to be an ADT URI such as /sap/bc/adt/oo/classes/zcl_demo; "
+            "search_objects returns it."
+        )
     uri = uri.rstrip("/")
     if "/source/" in uri:
         return uri.split("/source/", 1)[0], uri

@@ -264,3 +264,18 @@ async def test_a_list_answer_stays_a_list(client):
     result = await call("search_objects", query="Z_TEST*")
     assert '"Z_TEST"' in text(result)
     assert result.structured_content == {"result": [{"name": "Z_TEST", "uri": REPORT}]}
+
+
+async def test_a_name_instead_of_a_uri_gets_a_clear_error(client):
+    result = await call("get_source", uri="ZCL_KAS_ORDER")
+    assert result.is_error
+    assert "ZCL_KAS_ORDER is not a uri" in text(result)
+    assert "/sap/bc/adt/oo/classes/zcl_demo" in text(result)
+    client.get_object_source.assert_not_called()
+
+
+async def test_an_unexpected_error_keeps_its_reason(client):
+    client.search_object.side_effect = KeyError("adtcore:name")
+    result = await call("search_objects", query="Z*")
+    assert result.is_error
+    assert "KeyError" in text(result) and "adtcore:name" in text(result)
