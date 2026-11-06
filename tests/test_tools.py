@@ -6,6 +6,7 @@ from mcp import Client
 
 from abap_adt_mcp import app
 from abap_adt_mcp.server import mcp
+from abap_adt_mcp.tools._schema import compact
 
 REPORT = "/sap/bc/adt/programs/programs/z_test"
 
@@ -206,3 +207,34 @@ async def test_authorization_object_defaults_to_cross_application_class(client):
 async def test_authorization_field_update_passes_empty_check_table(client):
     await call("update_authorization_field", name="ZAF_TEST", check_table="")
     client.update_authorization_field.assert_called_once_with("ZAF_TEST", None, "", None)
+
+
+def test_compact_schema():
+    schema = {
+        "title": "Args",
+        "properties": {
+            "title": {"title": "Title", "type": "string"},
+            "transport": {"anyOf": [{"type": "string"}, {"type": "null"}], "default": None, "title": "Transport"},
+            "uris": {"anyOf": [{"type": "string"}, {"items": {"type": "string"}, "type": "array"}], "title": "Uris"},
+            "max": {"default": 20, "title": "Max", "type": "integer"},
+        },
+    }
+    assert compact(schema) == {
+        "properties": {
+            "title": {"type": "string"},
+            "transport": {"type": "string"},
+            "uris": {"anyOf": [{"type": "string"}, {"items": {"type": "string"}, "type": "array"}]},
+            "max": {"default": 20, "type": "integer"},
+        },
+    }
+
+
+async def test_listed_schemas_are_compact_and_optional_values_still_accept_null(client):
+    async with Client(mcp) as session:
+        tools = {tool.name: tool for tool in (await session.list_tools()).tools}
+    write = tools["write_source"].input_schema
+    assert "title" not in write and "title" not in write["properties"]["uri"]
+    assert write["properties"]["transport"] == {"type": "string"}
+    assert write["required"] == ["uri", "source"]
+    result = await call("write_source", uri=REPORT, source="REPORT z_test.", transport=None)
+    assert not result.is_error

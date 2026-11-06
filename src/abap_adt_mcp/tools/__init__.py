@@ -14,3 +14,6 @@ from . import (  # noqa: F401
     source,
     transport,
 )
+from ._schema import compact_tool_schemas
+
+compact_tool_schemas()
