@@ -2,9 +2,11 @@
 
 from . import (  # noqa: F401
     authorization,
+    cloud,
     create,
     ddic,
     enhancements,
+    jobs,
     messages,
     navigation,
     quality,

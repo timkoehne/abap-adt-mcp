@@ -279,3 +279,144 @@ async def test_an_unexpected_error_keeps_its_reason(client):
     result = await call("search_objects", query="Z*")
     assert result.is_error
     assert "KeyError" in text(result) and "adtcore:name" in text(result)
+
+
+async def test_create_object_in_a_language_version(client):
+    result = await call(
+        "create_object", object_type="CLAS/OC", name="zcl_x", package="$TMP", description="x",
+        language_version="cloudDevelopment",
+    )
+    assert not result.is_error
+    client.create.assert_called_once_with("CLAS/OC", "zcl_x", "$TMP", "x", None, "cloudDevelopment")
+    assert text(result) == "Created CLAS/OC ZCL_X in cloudDevelopment"
+
+
+async def test_create_object_without_a_version_answers_as_before(client):
+    result = await call("create_object", object_type="PROG/P", name="z_test", package="$TMP", description="x")
+    client.create.assert_called_once_with("PROG/P", "z_test", "$TMP", "x", None, None)
+    assert text(result) == "Created PROG/P Z_TEST"
+
+
+async def test_language_version_takes_a_source_uri(client):
+    client.get_language_version.return_value = {"name": "ZCL_X", "version": "standard"}
+    await call("get_language_version", uri="/sap/bc/adt/oo/classes/zcl_x/source/main")
+    client.get_language_version.assert_called_once_with("/sap/bc/adt/oo/classes/zcl_x")
+    result = await call("set_language_version", uri="/sap/bc/adt/oo/classes/zcl_x", version="cloudDevelopment")
+    client.set_language_version.assert_called_once_with("/sap/bc/adt/oo/classes/zcl_x", "cloudDevelopment", None)
+    assert "cloudDevelopment" in text(result)
+
+
+async def test_unknown_language_version_is_refused(client):
+    result = await call("set_language_version", uri="/sap/bc/adt/oo/classes/zcl_x", version="5")
+    assert result.is_error
+    client.set_language_version.assert_not_called()
+
+
+async def test_api_release_state_finds_the_object_by_type_and_name(client):
+    client.search_object.return_value = [
+        {"name": "WAERS", "type": "DOMA/DD", "uri": "/sap/bc/adt/ddic/domains/waers"},
+        {"name": "WAERS", "type": "DTEL/DE", "uri": "/sap/bc/adt/ddic/dataelements/waers"},
+    ]
+    client.get_api_release_state.return_value = {
+        "name": "WAERS", "type": "DTEL/DE", "uri": "/sap/bc/adt/ddic/dataelements/waers", "state": "RELEASED",
+        "cloud_development": True, "key_user": True, "successors": [],
+        "contracts": [{"contract": "C1", "state": "RELEASED", "successor_concept": "", "comment": ""}],
+    }
+    result = await call("get_api_release_state", object_type="DTEL", name="waers")
+    assert not result.is_error
+    client.get_api_release_state.assert_called_once_with("/sap/bc/adt/ddic/dataelements/waers")
+    assert result.structured_content["contracts"] == [{"contract": "C1", "state": "RELEASED"}]
+
+
+async def test_api_release_state_of_a_function_module(client):
+    uri = "/sap/bc/adt/functions/groups/snr3/fmodules/number_get_next"
+    client.search_object.return_value = [{"name": "NUMBER_GET_NEXT", "type": "FUGR/FF", "uri": uri}]
+    client.get_api_release_state.return_value = {
+        "name": "NUMBER_GET_NEXT", "type": "FUGR/FF", "uri": uri, "state": "NOT_TO_BE_RELEASED",
+        "cloud_development": False, "key_user": False,
+        "successors": [{"name": "CL_NUMBERRANGE_RUNTIME", "type": "CLAS/OC", "uri": "/sap/bc/adt/oo/classes/cl_numberrange_runtime"}],
+        "contracts": [],
+    }
+    result = await call("get_api_release_state", object_type="FUNC", name="NUMBER_GET_NEXT")
+    assert result.structured_content["successors"] == [{"name": "CL_NUMBERRANGE_RUNTIME", "type": "CLAS/OC"}]
+
+
+async def test_api_release_state_of_an_unknown_object(client):
+    client.search_object.return_value = []
+    result = await call("get_api_release_state", object_type="CLAS", name="CL_NONE")
+    assert result.is_error
+    assert text(result).endswith("No object CL_NONE of type CLAS found")
+    client.get_api_release_state.assert_not_called()
+
+
+async def test_list_atc_checks_filters(client):
+    client.list_atc_checks.return_value = [
+        {"name": "CI_SYSUBRC", "description": "Check of SY-SUBRC Handling", "category": "CI_ROBUSTNESS", "category_description": "Robustness"},
+        {"name": "CI_DB_OPS_IN_LOOPS", "description": "Search DB Operations in loops", "category": "CI_PERFORMANCE", "category_description": "Performance"},
+    ]
+    result = await call("list_atc_checks", search="sy-subrc")
+    assert result.structured_content == {
+        "result": [{"name": "CI_SYSUBRC", "description": "Check of SY-SUBRC Handling", "category": "CI_ROBUSTNESS"}]
+    }
+    result = await call("list_atc_checks", category="ci_performance")
+    assert [c["name"] for c in result.structured_content["result"]] == ["CI_DB_OPS_IN_LOOPS"]
+    result = await call("list_atc_checks", category="NONE")
+    assert text(result) == "No checks found."
+
+
+async def test_save_check_variant_passes_the_checks_as_dicts(client):
+    result = await call(
+        "save_check_variant", name="zcv", package="$TMP", description="d",
+        checks=[{"name": "CI_SYSUBRC", "parameters": {"ReadDB": True}}, {"name": "CI_NO_ORDER_BY"}],
+    )
+    assert not result.is_error
+    client.save_check_variant.assert_called_once_with(
+        "zcv", "$TMP", "d", [{"name": "CI_SYSUBRC", "parameters": {"ReadDB": True}}, {"name": "CI_NO_ORDER_BY"}], None
+    )
+    assert text(result) == "Saved and activated check variant ZCV with 2 checks"
+
+
+async def test_delete_check_variant(client):
+    result = await call("delete_check_variant", name="zcv")
+    client.delete_check_variant.assert_called_once_with("zcv", None)
+    assert text(result) == "Deleted check variant ZCV"
+
+
+async def test_create_lock_object(client):
+    result = await call(
+        "create_lock_object", name="ezlock", package="$TMP", description="d", primary_table="ZHEAD",
+        secondary_tables=[{"table": "ZITEM"}], parameters=["MANDT", {"name": "POS", "table": "ZITEM"}],
+    )
+    assert not result.is_error
+    client.create_lock_object.assert_called_once_with(
+        "ezlock", "$TMP", "d", "ZHEAD", "E", [{"table": "ZITEM"}], ["MANDT", {"name": "POS", "table": "ZITEM"}],
+        False, None,
+    )
+    assert "ENQUEUE_EZLOCK" in text(result)
+
+
+async def test_job_template_parameters(client):
+    result = await call(
+        "create_job_template", name="zjt", package="$TMP", description="d", catalog_entry="ZJC",
+        parameters={"P_ID": "A1", "S_DATE": [{"sign": "I", "option": "BT", "low": "20250101", "high": "20251231"}]},
+    )
+    assert not result.is_error
+    client.create_job_template.assert_called_once_with(
+        "zjt", "$TMP", "d", "ZJC",
+        {"P_ID": "A1", "S_DATE": [{"sign": "I", "option": "BT", "low": "20250101", "high": "20251231"}]}, None,
+    )
+
+
+async def test_job_catalog_entry_leaves_out_the_raw_source(client):
+    client.get_job_catalog_entry.return_value = {
+        "name": "ZJC", "description": "d", "class_name": "ZCL_JOB", "parameters": [{"name": "P_ID"}], "source": {"x": 1},
+    }
+    result = await call("get_job_catalog_entry", name="zjc")
+    assert result.structured_content == {
+        "name": "ZJC", "description": "d", "class_name": "ZCL_JOB", "parameters": [{"name": "P_ID"}]
+    }
+
+
+async def test_application_log_object(client):
+    await call("create_application_log_object", name="zlog", package="$TMP", description="d", subobjects=[{"name": "RUN"}])
+    client.create_application_log_object.assert_called_once_with("zlog", "$TMP", "d", [{"name": "RUN", "description": ""}], None)

@@ -4,8 +4,9 @@ An [MCP](https://modelcontextprotocol.io) server that gives AI agents access to 
 ABAP Development Tools (ADT) REST API. It is a thin layer over the
 [abap-adt-py](https://github.com/timkoehne/abap-adt-py) library: search and browse the repository, read and write
 source code, activate, run syntax checks, unit tests and ATC, run SQL queries and classes, read short dumps,
-maintain domains, data elements, message classes and authorization objects, implement BAdIs, publish OData service bindings and manage
-transport requests.
+maintain domains, data elements, message classes, authorization objects and lock objects, implement BAdIs, publish OData service
+bindings, set up application jobs and logs, maintain ATC check variants, change ABAP language versions, read the release state
+of APIs and manage transport requests.
 
 ## Running
 
@@ -40,12 +41,14 @@ claude mcp add --transport http abap-adt http://localhost:2236/mcp --header "Aut
 | Repository | `search_objects`, `package_contents`, `object_package_path`, `object_structure` |
 | Source | `get_source`, `write_source`, `activate`, `list_inactive_objects`, `pretty_print` |
 | Create / delete | `create_object`, `create_package`, `create_table_type`, `create_test_class_include`, `delete_object` |
-| Dictionary | `create_domain`, `get_domain`, `update_domain`, `create_data_element`, `get_data_element`, `update_data_element` |
+| Dictionary | `create_domain`, `get_domain`, `update_domain`, `create_data_element`, `get_data_element`, `update_data_element`, `create_lock_object`, `get_lock_object` |
 | Message classes | `create_message_class`, `get_message_class`, `set_messages`, `delete_messages` |
 | Authorizations | `create_authorization_field`, `get_authorization_field`, `update_authorization_field`, `create_authorization_object`, `get_authorization_object`, `update_authorization_object` |
 | BAdIs | `get_enhancement_spot`, `get_enhancement_implementation`, `create_enhancement_implementation`, `update_enhancement_implementation` |
 | Service bindings | `create_service_binding`, `get_service_binding`, `publish_service_binding`, `unpublish_service_binding` |
-| Quality | `syntax_check`, `run_unit_tests`, `run_atc`, `list_check_variants`, `atc_documentation` |
+| Quality | `syntax_check`, `run_unit_tests`, `run_atc`, `list_check_variants`, `atc_documentation`, `list_atc_checks`, `get_atc_check`, `get_check_variant`, `save_check_variant`, `delete_check_variant` |
+| ABAP Cloud | `get_language_version`, `set_language_version` (`create_object` takes a `language_version`), `get_api_release_state` |
+| Jobs and logs | `create_job_catalog_entry`, `get_job_catalog_entry`, `create_job_template`, `get_job_template`, `create_application_log_object`, `get_application_log_object` |
 | Navigation | `find_definition`, `where_used`, `code_completion` |
 | Runtime | `run_query`, `run_class`, `list_dumps`, `get_dump` |
 | Transports | `transport_info`, `create_transport`, `list_transports`, `release_transport`, `delete_transport` |

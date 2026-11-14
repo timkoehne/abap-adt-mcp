@@ -32,6 +32,11 @@ Objects are addressed by ADT URIs, e.g.
   /sap/bc/adt/messageclass/z_demo               message class
   /sap/bc/adt/enhancements/enhoxhb/z_demo       enhancement implementation
   /sap/bc/adt/businessservices/bindings/z_demo  service binding
+  /sap/bc/adt/ddic/lockobjects/sources/ez_demo  lock object
+  /sap/bc/adt/atc/checkvariants/z_demo          ATC check variant
+  /sap/bc/adt/applicationjob/catalogs/z_demo    application job catalog entry
+  /sap/bc/adt/applicationjob/templates/z_demo   application job template
+  /sap/bc/adt/applicationlog/objects/z_demo     application log object
   /sap/bc/adt/packages/z_demo                   package
 search_objects returns the URI of every hit. Source code lives below the object at
 <object uri>/source/main (class includes: <class uri>/includes/testclasses, ...);

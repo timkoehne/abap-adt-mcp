@@ -13,6 +13,7 @@ async def create_object(
     package: str,
     description: str,
     transport: Optional[str] = None,
+    language_version: Optional[Literal["standard", "cloudDevelopment", "keyUser"]] = None,
 ) -> str:
     """Create an empty object, then fill it with write_source.
 
@@ -21,9 +22,14 @@ async def create_object(
     metadata extension, DCLS/DL access control, SRVD/SRV service definition, BDEF/BDO behavior
     definition (named after its root CDS entity). Other types have their own create tools.
     package: $TMP for local objects; for a function module, its function group.
+    language_version: ABAP language version, default standard; cloudDevelopment = ABAP for Cloud
+    Development (not for reports, includes, function modules and message classes).
     """
-    await run(lambda c: c.create(object_type, name, package, description, transport))
-    return f"Created {object_type} {name.upper()}"
+    await run(
+        lambda c: c.create(object_type, name, package, description, transport, language_version)
+    )
+    version = f" in {language_version}" if language_version else ""
+    return f"Created {object_type} {name.upper()}{version}"
 
 
 @mcp.tool(annotations=WRITE)

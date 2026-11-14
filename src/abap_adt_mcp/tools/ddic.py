@@ -1,10 +1,10 @@
-from typing import Any, Literal, Optional
+from typing import Any, Literal, Optional, Union
 
 from abap_adt_py.api.ddic import ReferenceKinds
 
 from ..app import mcp, run
 from ._annotations import READ, WRITE
-from ._models import FieldLabels, FixedValue, plain
+from ._models import FieldLabels, FixedValue, LockParameter, LockTable, plain
 
 
 @mcp.tool(annotations=WRITE)
@@ -174,3 +174,42 @@ async def update_data_element(
         )
     )
     return f"Updated and activated data element {name.upper()}"
+
+
+@mcp.tool(annotations=WRITE)
+async def create_lock_object(
+    name: str,
+    package: str,
+    description: str,
+    primary_table: str,
+    lock_mode: Literal["E", "S", "X"] = "E",
+    secondary_tables: Optional[list[LockTable]] = None,
+    parameters: Optional[list[Union[str, LockParameter]]] = None,
+    allow_rfc: bool = False,
+    transport: Optional[str] = None,
+) -> str:
+    """Create and activate a lock object; activation generates ENQUEUE_<name> and DEQUEUE_<name>.
+
+    name starts with EZ. lock_mode: E write lock, S shared, X exclusive (not cumulative).
+    parameters: the lock arguments, field names of the primary table or {name, table, field};
+    left out, the primary table's key fields. In ABAP for Cloud Development use the lock object
+    through cl_abap_lock_object_factory. Its uri is /sap/bc/adt/ddic/lockobjects/sources/<name>.
+    """
+    arguments = (
+        [p if isinstance(p, str) else p.model_dump(exclude_none=True) for p in parameters]
+        if parameters is not None
+        else None
+    )
+    await run(
+        lambda c: c.create_lock_object(
+            name, package, description, primary_table, lock_mode, plain(secondary_tables), arguments,
+            allow_rfc, transport,
+        )
+    )
+    return f"Created and activated lock object {name.upper()} (ENQUEUE_{name.upper()}, DEQUEUE_{name.upper()})"
+
+
+@mcp.tool(annotations=READ)
+async def get_lock_object(name: str) -> dict[str, Any]:
+    """A lock object's primary and secondary tables, lock modes, lock parameters and function modules."""
+    return await run(lambda c: c.get_lock_object(name))
