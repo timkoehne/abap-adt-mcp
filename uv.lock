@@ -10,7 +10,7 @@ resolution-markers = [
 
 [[package]]
 name = "abap-adt-mcp"
-version = "0.3.2"
+version = "0.3.3"
 source = { editable = "." }
 dependencies = [
     { name = "abap-adt-py" },
@@ -25,7 +25,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "abap-adt-py", specifier = ">=0.3.4" },
+    { name = "abap-adt-py", specifier = ">=0.3.5" },
     { name = "mcp", specifier = ">=2.2" },
 ]
 
@@ -37,15 +37,15 @@ dev = [
 
 [[package]]
 name = "abap-adt-py"
-version = "0.3.4"
+version = "0.3.5"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "requests" },
     { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/36/f1/1b39e02bf17ee215770eb916531312af116f0db3a9b62e5fea443da1b53a/abap_adt_py-0.3.4.tar.gz", hash = "sha256:636c70aec374d449e1a29ae75b2667ba156bfd776301737b1dc398eba060811b", size = 56280, upload-time = "2026-11-08T16:25:36.558Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/a3/5a/3ee0ab53e0b0abb1b5419a4f64e0b4cd9699f28cef053ccae0f4aeea076d/abap_adt_py-0.3.5.tar.gz", hash = "sha256:817710bd4b82ab15eb7443ecb9011d425aa405768d94600decf329fc8126918e", size = 68877, upload-time = "2026-11-14T10:23:18.79Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/ba/30/1bd5768266a32307bdedd9a1f8d8a1edd0d7eca94e89990e5579ae569153/abap_adt_py-0.3.4-py3-none-any.whl", hash = "sha256:458257103f6fb3d2872fdc2bb1d3e199b38187c0c7c30504fd10d54fdabab5cb", size = 67831, upload-time = "2026-11-08T16:25:35.286Z" },
+    { url = "https://files.pythonhosted.org/packages/1b/43/dd9b9677b0cddcb3c6d93af82d07d23899a366c3de762f4b0c330ba32bb3/abap_adt_py-0.3.5-py3-none-any.whl", hash = "sha256:53c15c14f1601602bef6889b1e3eae9204d6605515544ac4d02ac82cf860177f", size = 84230, upload-time = "2026-11-14T10:23:17.375Z" },
 ]
 
 [[package]]
